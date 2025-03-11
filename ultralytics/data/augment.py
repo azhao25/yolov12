@@ -2740,5 +2740,10 @@ class ToTensor:
         im = np.ascontiguousarray(im.transpose((2, 0, 1))[::-1])  # HWC to CHW -> BGR to RGB -> contiguous
         im = torch.from_numpy(im)  # to torch
         im = im.half() if self.half else im.float()  # uint8 to fp16/32
-        im /= 255.0  # 0-255 to 0.0-1.0
+        if im.dtype == np.uint8:
+            im /= 255.0  # 0-255 to 0.0-1.0
+        elif im.dtype == np.uint16:
+            im /= (2**16 - 1)
+        else:
+            raise ValueError(f"Unsupported image dtype: {im.dtype}")
         return im
